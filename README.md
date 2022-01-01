@@ -1,2 +1,14 @@
 # personal-chat
-This is sample app for personal-chat (like skype).
+This is app for personal-chat (like skype).
+## Prerequisites
+1) Install Node.js
+1) Install MongoDB
+
+## Development Procedures
+1) Clone this git repository
+1) Run dev server
+    ```
+    $ npm install
+    $ npm run dev
+    ```
+1) Access Client `http://localhost:3000`
