@@ -1,3 +1,6 @@
+<script>
+    const CURRENT_USER_ID = "{{id}}";
+</script>
 <div class="section row">
     <div class="col s2">
         <img src="{{image}}" class="circle responsive-img img-small">
@@ -10,3 +13,42 @@
 <div>
     <p class="flow-text">Let chat and video call with anyone...</p>
 </div>
+<div>
+    <input type="text" placeholder="Search user by name" name="search-user" id="search_user">
+</div>
+<div>
+    <div id="search_result">
+    </div>
+
+</div>
+<script>
+    $("#search_user").on('keyup', function () {
+        $.post("/api/user-search",
+            {
+                "search_user": this.value
+            },
+            function (data, status) {
+                $("#search_result").empty();
+                data.forEach((user) => {
+                    $("#search_result").append(`
+                    <div class="card row" style="padding: 10px; height:85px;">
+                        <div class="col" style="padding: 0;">
+                            <img src="${user.image}" class="circle responsive-img img-small" style="max-width: 65px;">
+                        </div>
+                        <div class="col">
+                            <h5>${user.displayName}</h5>
+                        </div>
+                        ${CURRENT_USER_ID !== user._id ? `<div class="col right chip teal lighten-2" style="
+                            width: 75px;
+                            text-align: center;
+                            margin: 16px;
+                        ">
+                            chat
+                        </div>`: ``}
+                    </div>
+                `);
+                });
+
+            });
+    })
+</script>
