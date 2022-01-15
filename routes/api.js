@@ -22,6 +22,18 @@ router.post("/user-search", async (req, res) => {
   }
 });
 
+//@desc API/User By Id User
+//@route POST /api/user/:id
+router.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).lean();
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: err });
+  }
+})
+
 //@desc API/Create or Update Chat Room
 //@route POST /api/chat-room
 router.post("/chat-room", async (req, res) => {

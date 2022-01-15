@@ -22,6 +22,17 @@
 
 </div>
 <script>
+    const goToChat = (targetUserId, currentUserId = CURRENT_USER_ID) => {
+        $.post("/api/chat-room",
+            {
+                "target_user": targetUserId,
+                "current_user": currentUserId
+            },
+            function (data, status) {
+                location.href = `/chat/${targetUserId}`;
+            }
+        );
+    }
     $("#search_user").on('keyup', function () {
         $.post("/api/user-search",
             {
@@ -38,13 +49,15 @@
                         <div class="col">
                             <h5>${user.displayName}</h5>
                         </div>
-                        ${CURRENT_USER_ID !== user._id ? `<div class="col right chip teal lighten-2" style="
+                        ${CURRENT_USER_ID !== user._id ? `<button class="col right btn chip teal lighten-2" style="
                             width: 75px;
                             text-align: center;
                             margin: 16px;
-                        ">
+                        "
+                        onclick="goToChat('${user._id}')"
+                        >
                             chat
-                        </div>`: ``}
+                        </button>`: ``}
                     </div>
                 `);
                 });

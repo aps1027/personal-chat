@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { ensureAuth, ensureGuest } = require("../middleware/auth");
 
+const User = require("../models/User");
 const Room = require("../models/Room");
 
 //@desc Login/Landing page
@@ -24,8 +25,11 @@ router.get("/dashboard", ensureAuth, async (req, res) => {
 
 //@desc Chat
 //@route GET /chat
-router.get("/chat", ensureAuth, async (req, res) => {
+router.get("/chat/:targetId", ensureAuth, async (req, res) => {
   try {
+    const tragetUser = await User.findOne({
+      _id: req.params.targetId,
+    }).lean();
     const rooms = await Room.aggregate([
       { $match: { members: req.user._id } },
       {
@@ -55,6 +59,9 @@ router.get("/chat", ensureAuth, async (req, res) => {
       name: req.user.displayName,
       image: req.user.image,
       rooms: rooms,
+      targetId: req.params.targetId,
+      targetName: tragetUser.displayName,
+      targetImage: tragetUser.image,
     });
   } catch (err) {
     console.error(err);
