@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose  = require('mongoose');
 const router = express.Router();
 const { ensureAuth, ensureGuest } = require("../middleware/auth");
 
@@ -30,6 +31,9 @@ router.get("/chat/:targetId", ensureAuth, async (req, res) => {
     const tragetUser = await User.findOne({
       _id: req.params.targetId,
     }).lean();
+    const targetRoom = await Room.findOne({
+      members: { $all: [req.user._id, mongoose.Types.ObjectId(req.params.targetId)]}
+    }).lean();
     const rooms = await Room.aggregate([
       { $match: { members: req.user._id } },
       {
@@ -59,6 +63,7 @@ router.get("/chat/:targetId", ensureAuth, async (req, res) => {
       name: req.user.displayName,
       image: req.user.image,
       rooms: rooms,
+      targetRoomId: targetRoom._id,
       targetId: req.params.targetId,
       targetName: tragetUser.displayName,
       targetImage: tragetUser.image,
