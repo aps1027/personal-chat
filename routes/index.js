@@ -14,10 +14,10 @@ router.get("/", ensureGuest, (req, res) => {
   });
 });
 
-//@desc Dashboard
-//@route GET /dashboard
-router.get("/dashboard", ensureAuth, async (req, res) => {
-  res.render("dashboard", {
+//@desc personal-chat
+//@route GET /personal-chat
+router.get("/personal-chat", ensureAuth, async (req, res) => {
+  res.render("personal-chat", {
     id: req.user._id,
     name: req.user.displayName,
     image: req.user.image,

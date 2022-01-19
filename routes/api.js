@@ -35,6 +35,39 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
+router.get("/chat-room", async (req, res) => {
+  try {
+    const rooms = await Room.aggregate([
+      { $match: { members: req.user._id } },
+      {
+        $project: {
+          members: {
+            $filter: {
+              input: "$members",
+              as: "member",
+              cond: {
+                $ne: ["$$member", req.user._id],
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "members",
+          foreignField: "_id",
+          as: "members",
+        },
+      },
+    ]);
+    res.json(rooms);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: err });
+  }
+});
+
 //@desc API/Create or Update Chat Room
 //@route POST /api/chat-room
 router.post("/chat-room", async (req, res) => {
@@ -60,7 +93,24 @@ router.post("/chat-room", async (req, res) => {
     } else {
       chatRoom = await Room.create({ members: members });
     }
-    res.json(chatRoom);
+    const tragetUser = await User.findOne({
+      _id: mongoose.Types.ObjectId(targeTuser),
+    }).lean();
+
+    let startDate = new Date();
+    startDate.setDate(startDate.getDate() - 2);
+
+    let endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+
+    const messages = await Message.find({
+      room: mongoose.Types.ObjectId(chatRoom._id),
+      createdAt: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    });
+    res.json({ room: chatRoom, user: tragetUser, messages: messages });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err });

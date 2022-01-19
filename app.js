@@ -28,10 +28,14 @@ const Message = require("./models/Message");
 
 const io = new Server(server);
 io.on("connection", (socket) => {
-  socket.on("user connect", async ({ room_id, user_id }) => {
+  
+  socket.on("user connect", async ({ user_id }) => {
     socket.user_id = user_id;
     await User.findByIdAndUpdate(user_id, { connected: true });
     socket.join(user_id);
+  });
+
+  socket.on("select room", async ({ room_id }) => {
     socket.join(room_id);
   });
 
@@ -39,6 +43,7 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("private message", {
       message,
       from,
+      roomId
     });
     Message.create({
       text: message,
