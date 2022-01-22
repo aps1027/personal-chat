@@ -35,6 +35,8 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
+//@desc API/chat room
+//@route GET /api/chat-room
 router.get("/chat-room", async (req, res) => {
   try {
     const rooms = await Room.aggregate([
