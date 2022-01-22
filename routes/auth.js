@@ -21,7 +21,7 @@ router.get(
     failureRedirect: "/",
   }),
   (req, res) => {
-    res.redirect("/dashboard");
+    res.redirect("/personal-chat");
   }
 );
 

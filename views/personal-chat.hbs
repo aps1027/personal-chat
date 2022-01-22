@@ -1,0 +1,189 @@
+<div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card chat-app">
+            <div id="plist" class="people-list">
+                <div class="row p-3 profile m-0">
+                    <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                        <img src="{{image}}" alt="avatar" referrerpolicy="no-referrer" />
+                    </a>
+                    <div>
+                        <h5>{{name}}</h5>
+                    </div>
+                </div>
+
+                <div class="input-group p-2 mt-2">
+                    <div class="input-group-prepend">
+                        <a class="btn input-group-text" id="js_search_cancel"><i class="fa fa-xmark"></i></a>
+                    </div>
+                    <input type="text" id="js_search_user" class="form-control" placeholder="Search..." />
+                </div>
+                <ul id="js_search_result" class="list-unstyled chat-list mt-2 mb-0">
+                </ul>
+            </div>
+            <div class="chat" id="js_chat">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const CURRENT_USER_ID = "{{id}}";
+    let CURRENT_ROOM_ID = "";
+
+    const socket = io();
+
+    socket.emit('user connect', {
+        user_id: CURRENT_USER_ID
+    });
+
+    socket.on("private message", ({ message, from, roomId }) => {
+        if (roomId === CURRENT_ROOM_ID) {
+            showSingleMessage(from, message);
+        }
+    });
+
+    socket.on("show noti", ({ room, noti }) => {
+        if (room !== CURRENT_ROOM_ID) {
+            $(`#${room}`).append(`
+                <div class="noti badge badge-light float-right m-2 text-danger" style="font-size: 18px;">
+                    <i class="fas fa-bell"></i>
+                </div>`);
+        }
+    });
+
+    const selectTargetUser = (tragetId) => {
+        location.href = `/chat/${tragetId}`;
+    };
+
+    const createUserCard = (user, room) => {
+        return `<li ${room ? `id="${room._id}"` : ''} class="clearfix" onclick="showChat('${user._id}', this)">
+                    <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
+                    <div class="about">
+                        <div class="name">${user.displayName}</div>
+                        <div class="status">
+                            <i class="fa fa-circle online"></i> online
+                        </div>
+                    </div>
+                </li>`
+    }
+
+    const showChatHeader = (user) => {
+        $("#js_chat_header").remove();
+        $("#js_chat").append(`<div id="js_chat_header" class="chat-header clearfix">
+            <div class="row">
+                <div class="col-lg-6">
+                    <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
+                    <div class="chat-about">
+                        <div class="name">${user.displayName}</div>
+                        <div class="status">
+                            <i class="fa fa-circle online"></i> online
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`);
+    }
+
+    const showSingleMessage = (from, message) => {
+        $("#js_chat_messages ul").append(
+            `<li class="clearfix">
+                <div class="message ${from === CURRENT_USER_ID ? 'my-message float-right' :
+                'other-message'}">
+                    ${message}</div>
+            </li>`);
+        $("#js_chat_messages").scrollTop($("#js_chat_messages ul")[0].scrollHeight);
+    }
+    const showChatMessages = (messages) => {
+        $("#js_chat_messages").remove();
+        $("#js_chat").append(
+            `<div class="chat-history" id="js_chat_messages"><ul class="m-b-0"></ul></div>`);
+        messages.forEach((message) => {
+            showSingleMessage(message.from, message.text)
+        });
+    }
+
+    const showMessageBox = (user, room) => {
+        $("#js_chat_message_box").remove();
+        $("#js_chat").append(`<div class= "chat-message clearfix" id="js_chat_message_box">
+            <form onsubmit="sendMessage('${user._id}', '${room._id}')">
+            <div class="input-group mb-0">
+                <div class="input-group-prepend">
+                    <button type="submit" class="input-group-text"><i class="fa fa-paper-plane"></i></button>
+                </div>
+                <input type="text" class="form-control" placeholder="Enter text here..." id="js_message" />
+            </div>
+            </form>
+        </div > `);
+    }
+
+
+    const sendMessage = (tragetId, roomId) => {
+        event.preventDefault();
+        if (js_message.value) {
+            socket.emit("send message", {
+                message: js_message.value,
+                roomId: roomId,
+                from: CURRENT_USER_ID,
+                to: tragetId
+            });
+            showSingleMessage(CURRENT_USER_ID, js_message.value);
+            js_message.value = "";
+        }
+    }
+
+    const showChat = (targetUserId, element) => {
+        $(element).children(".noti").remove();
+        $.post("/api/chat-room",
+            {
+                "target_user": targetUserId,
+                "current_user": CURRENT_USER_ID
+            },
+            function (data, status) {
+                CURRENT_ROOM_ID = data.room._id;
+                showChatHeader(data.user);
+                showChatMessages(data.messages);
+                showMessageBox(data.user, data.room);
+
+                socket.emit('select room', {
+                    room_id: CURRENT_ROOM_ID,
+                });
+            }
+        );
+    }
+
+    const showFriendList = () => {
+        $("#js_search_result").empty();
+        $.get(`/api/chat-room`,
+            function (data, status) {
+                data.forEach((room) => {
+                    room.members.forEach((user) => {
+                        $("#js_search_result").append(createUserCard(user, room));
+                    })
+                });
+            }
+        );
+    }
+
+
+    $("#js_search_user").on('keyup', function () {
+        $.post("/api/user-search",
+            {
+                "search_user": this.value
+            },
+            function (data, status) {
+                $("#js_search_result").empty();
+                data.forEach((user) => {
+                    $("#js_search_result").append(
+                        CURRENT_USER_ID !== user._id ? createUserCard(user) : ``);
+                });
+
+            });
+    });
+
+    $("#js_search_cancel").on('click', function () {
+        $("#js_search_user").val("");
+        showFriendList();
+    });
+
+
+    showFriendList();
+</script>

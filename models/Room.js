@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 
 const RoomSchema = new mongoose.Schema({
   members: {
-    type: Array,
+    type: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }],
     required: true,
   },
   createdAt: {

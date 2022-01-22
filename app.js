@@ -8,6 +8,9 @@ const passport = require("passport");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const connectDB = require("./config/db");
+const http = require("http");
+const { Server } = require("socket.io");
+const mongoose = require("mongoose");
 
 // Load config
 dotenv.config({ path: "./config/config.env" });
@@ -18,6 +21,47 @@ require("./config/passport")(passport);
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+
+const User = require("./models/User");
+const Message = require("./models/Message");
+
+const io = new Server(server);
+io.on("connection", (socket) => {
+  
+  socket.on("user connect", async ({ user_id }) => {
+    socket.user_id = user_id;
+    await User.findByIdAndUpdate(user_id, { connected: true });
+    socket.join(user_id);
+  });
+
+  socket.on("select room", async ({ room_id }) => {
+    socket.join(room_id);
+  });
+
+  socket.on("send message", ({ message, roomId, from, to }) => {
+    socket.to(roomId).emit("private message", {
+      message,
+      from,
+      roomId
+    });
+    Message.create({
+      text: message,
+      from: mongoose.Types.ObjectId(from),
+      room: mongoose.Types.ObjectId(roomId),
+    });
+    socket
+      .to(to)
+      .emit("show noti", { room: roomId, noti: true });
+  });
+
+  socket.on("disconnect", async () => {
+    if(socket.user_id) {
+      await User.findByIdAndUpdate(socket.user_id, { connected: false });
+    }
+    console.log("user disconnected");
+  });
+});
 
 // Body parser
 app.use(express.urlencoded({ extended: false }));
@@ -92,7 +136,7 @@ app.use("/auth", require("./routes/auth"));
 app.use("/api", require("./routes/api"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(
+server.listen(
   PORT,
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 );

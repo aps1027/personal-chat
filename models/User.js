@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema({
   image: {
     type: String,
   },
+  connected: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
