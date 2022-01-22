@@ -2,24 +2,23 @@
     <div class="col-lg-12">
         <div class="card chat-app">
             <div id="plist" class="people-list">
-                <div class="row m-3 profile">
+                <div class="row p-3 profile m-0">
                     <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                         <img src="{{image}}" alt="avatar" referrerpolicy="no-referrer" />
                     </a>
-                    <div class="p-2">
-                        <h5 class="m-b-0">{{name}}</h5>
+                    <div>
+                        <h5>{{name}}</h5>
                     </div>
                 </div>
-                <div class="sub-list">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <a class="btn input-group-text" id="js_search_cancel"><i class="fa fa-xmark"></i></a>
-                        </div>
-                        <input type="text" id="js_search_user" class="form-control" placeholder="Search..." />
+
+                <div class="input-group p-2 mt-2">
+                    <div class="input-group-prepend">
+                        <a class="btn input-group-text" id="js_search_cancel"><i class="fa fa-xmark"></i></a>
                     </div>
-                    <ul id="js_search_result" class="list-unstyled chat-list mt-2 mb-0">
-                    </ul>
+                    <input type="text" id="js_search_user" class="form-control" placeholder="Search..." />
                 </div>
+                <ul id="js_search_result" class="list-unstyled chat-list mt-2 mb-0">
+                </ul>
             </div>
             <div class="chat" id="js_chat">
             </div>
@@ -72,12 +71,12 @@
         $("#js_chat").append(`<div id="js_chat_header" class="chat-header clearfix">
             <div class="row">
                 <div class="col-lg-6">
-                    <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                        <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
-                    </a>
+                    <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
                     <div class="chat-about">
-                        <h6 class="m-b-0">${user.displayName}</h6>
-                        <small>Last seen: 2 hours ago</small>
+                        <div class="name">${user.displayName}</div>
+                        <div class="status">
+                            <i class="fa fa-circle online"></i> online
+                        </div>
                     </div>
                 </div>
             </div>
