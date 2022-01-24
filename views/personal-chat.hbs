@@ -84,12 +84,14 @@
     }
 
     const showSingleMessage = (from, message) => {
+        let lastMessageClassList = $('.chat-history ul li div').last().attr('class');
+        let classList = `message ${from === CURRENT_USER_ID ? 'my-message float-right' : 'other-message'}`;
         $("#js_chat_messages ul").append(
             `<li class="clearfix">
-                <div class="message ${from === CURRENT_USER_ID ? 'my-message float-right' :
-                'other-message'}">
+                <div class="${lastMessageClassList && lastMessageClassList.includes(classList) ? classList : classList + ' mt-2'}">
                     ${message}</div>
             </li>`);
+
         $("#js_chat_messages").scrollTop($("#js_chat_messages ul")[0].scrollHeight);
     }
     const showChatMessages = (messages) => {
@@ -109,7 +111,7 @@
                 <div class="input-group-prepend">
                     <button type="submit" class="input-group-text"><i class="fa fa-paper-plane"></i></button>
                 </div>
-                <input type="text" class="form-control" placeholder="Enter text here..." id="js_message" />
+                <input type="text" class="form-control" placeholder="Enter text here..." id="js_message" autocomplete="off" />
             </div>
             </form>
         </div > `);

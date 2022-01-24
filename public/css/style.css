@@ -25,7 +25,7 @@ button:focus {
 .chat-app .chat {
   margin-left: 280px;
   border-left: 1px solid #ced4da;
-  height: 600px;
+  min-height: 600px;
 }
 
 .profile {
@@ -149,13 +149,12 @@ button:focus {
   border-radius: 15px;
   display: inline-block;
   position: relative;
-  max-width: 600px;
+  max-width: 400px;
 }
 
 .chat .chat-history .my-message {
   background: #206bfb;
   color: #fff;
-  text-align: right;
 }
 
 .chat .chat-history .other-message {
