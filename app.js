@@ -130,6 +130,17 @@ app.use(function (req, res, next) {
 // Static folder
 app.use(express.static(path.join(__dirname, "public")));
 
+/* Redirect http to https */
+app.get("*", function (req, res, next) {
+
+  if ("https" !== req.headers["x-forwarded-proto"] && "production" === process.env.NODE_ENV) {
+      res.redirect("https://" + req.hostname + req.url);
+  } else {
+      // Continue to other routes if we're not redirecting
+      next();
+  }
+});
+
 // Routes
 app.use("/", require("./routes/index"));
 app.use("/auth", require("./routes/auth"));
