@@ -24,40 +24,51 @@ const app = express();
 const server = http.createServer(app);
 
 const User = require("./models/User");
+const Room = require("./models/Room");
 const Message = require("./models/Message");
 
 const io = new Server(server);
 io.on("connection", (socket) => {
-  
   socket.on("user connect", async ({ user_id }) => {
     socket.user_id = user_id;
     await User.findByIdAndUpdate(user_id, { connected: true });
     socket.join(user_id);
+    socket.broadcast.emit("user connected", {user: socket.user_id});
   });
 
   socket.on("select room", async ({ room_id }) => {
     socket.join(room_id);
   });
 
-  socket.on("send message", ({ message, roomId, from, to }) => {
+  socket.on("send message", async ({ message, roomId, from, to }) => {
     socket.to(roomId).emit("private message", {
       message,
       from,
-      roomId
+      roomId,
     });
     Message.create({
       text: message,
       from: mongoose.Types.ObjectId(from),
       room: mongoose.Types.ObjectId(roomId),
     });
+
+    let targetUser = await User.findOne({
+      _id: mongoose.Types.ObjectId(from),
+    }).lean();
+
+    let targetRoom = await Room.findOne({
+      _id: mongoose.Types.ObjectId(roomId),
+    }).lean();
+
     socket
       .to(to)
-      .emit("show noti", { room: roomId, noti: true });
+      .emit("show noti", { room: targetRoom, user: targetUser, noti: true });
   });
 
   socket.on("disconnect", async () => {
-    if(socket.user_id) {
+    if (socket.user_id) {
       await User.findByIdAndUpdate(socket.user_id, { connected: false });
+      socket.broadcast.emit("user disconnected", {user: socket.user_id});
     }
     console.log("user disconnected");
   });
@@ -132,12 +143,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 /* Redirect http to https */
 app.get("*", function (req, res, next) {
-
-  if ("https" !== req.headers["x-forwarded-proto"] && "production" === process.env.NODE_ENV) {
-      res.redirect("https://" + req.hostname + req.url);
+  if (
+    "https" !== req.headers["x-forwarded-proto"] &&
+    "production" === process.env.NODE_ENV
+  ) {
+    res.redirect("https://" + req.hostname + req.url);
   } else {
-      // Continue to other routes if we're not redirecting
-      next();
+    // Continue to other routes if we're not redirecting
+    next();
   }
 });
 

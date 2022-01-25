@@ -41,9 +41,28 @@
         }
     });
 
-    socket.on("show noti", ({ room, noti }) => {
-        if (room !== CURRENT_ROOM_ID) {
-            $(`#${room}`).append(`
+    socket.on("user disconnected", ({ user }) => {
+        $(`[data-id="${user}"] .status`).empty();
+        $(`[data-id="${user}"] .status`).append(
+            '<i class="fa fa-circle offline"></i> offline');
+    })
+
+    socket.on("user connected", ({ user }) => {
+        $(`[data-id="${user}"] .status`).empty();
+        $(`[data-id="${user}"] .status`).append(
+            '<i class="fa fa-circle online"></i> online');
+    })
+
+    socket.on("show noti", ({ room, user, noti }) => {
+        let room_ids = [];
+        $("#js_search_result").find("li").each(function () { room_ids.push(this.id); });
+
+        if (!room_ids.includes(room._id)) {
+            $("#js_search_result").append(createUserCard(user, room));
+        }
+
+        if (room._id !== CURRENT_ROOM_ID) {
+            $(`#${room._id}`).append(`
                 <div class="noti badge badge-light float-right m-2 text-danger" style="font-size: 18px;">
                     <i class="fas fa-bell"></i>
                 </div>`);
@@ -55,12 +74,14 @@
     };
 
     const createUserCard = (user, room) => {
-        return `<li ${room ? `id="${room._id}"` : ''} class="clearfix" onclick="showChat('${user._id}', this)">
+        return `<li ${room ? `id="${room._id}"` : ''} data-id="${user._id}" class="clearfix" onclick="showChat('${user._id}', this)">
                     <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
                     <div class="about">
                         <div class="name">${user.displayName}</div>
                         <div class="status">
-                            <i class="fa fa-circle online"></i> online
+                            ${user.connected ?
+                '<i class="fa fa-circle online"></i> online' :
+                '<i class="fa fa-circle offline"></i> offline'}
                         </div>
                     </div>
                 </li>`
@@ -70,12 +91,14 @@
         $("#js_chat_header").remove();
         $("#js_chat").append(`<div id="js_chat_header" class="chat-header clearfix">
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-6" data-id="${user._id}">
                     <img src="${user.image}" alt="avatar" referrerpolicy="no-referrer" />
                     <div class="chat-about">
                         <div class="name">${user.displayName}</div>
                         <div class="status">
-                            <i class="fa fa-circle online"></i> online
+                            ${user.connected ?
+                '<i class="fa fa-circle online"></i> online' :
+                '<i class="fa fa-circle offline"></i> offline'}
                         </div>
                     </div>
                 </div>
