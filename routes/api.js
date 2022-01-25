@@ -95,14 +95,20 @@ router.post("/chat-room", async (req, res) => {
     } else {
       chatRoom = await Room.create({ members: members });
     }
-    const tragetUser = await User.findOne({
+    const targetUser = await User.findOne({
       _id: mongoose.Types.ObjectId(targeTuser),
     }).lean();
 
-    let startDate = new Date();
-    startDate.setDate(startDate.getDate() - 2);
+    let lastMessage = await Message.find({
+      room: mongoose.Types.ObjectId(chatRoom._id),
+    })
+      .sort({ $natural: -1 })
+      .limit(1).lean();
 
-    let endDate = new Date();
+    let startDate = new Date();
+    startDate.setDate(lastMessage[0].createdAt.getDate() - 2);
+
+    let endDate = lastMessage[0].createdAt;
     endDate.setHours(23, 59, 59, 999);
 
     const messages = await Message.find({
@@ -112,7 +118,7 @@ router.post("/chat-room", async (req, res) => {
         $lt: endDate,
       },
     });
-    res.json({ room: chatRoom, user: tragetUser, messages: messages });
+    res.json({ room: chatRoom, user: targetUser, messages: messages });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err });
