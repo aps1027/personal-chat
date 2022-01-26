@@ -74,9 +74,6 @@
                 body: 'You have new messages.',
                 icon: 'img/logo.png'
             });
-            msgNoti.addEventListener('click', function(){
-                window.open(window.location.href);
-            });
 
             socket.emit("save noti", {
                 type: 1, // 1 is for message, 2 is for call
