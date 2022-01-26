@@ -30,6 +30,13 @@
     let CURRENT_ROOM_ID = "";
 
     const socket = io();
+    if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+    }
+    // Otherwise, we need to ask the user for permission
+    else if (Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
 
     socket.emit('user connect', {
         user_id: CURRENT_USER_ID
@@ -62,16 +69,35 @@
         }
 
         if (room._id !== CURRENT_ROOM_ID) {
-            $(`#${room._id}`).append(`
-                <div class="noti badge badge-light float-right m-2 text-danger" style="font-size: 18px;">
-                    <i class="fas fa-bell"></i>
-                </div>`);
+            showNoti(room);
+            const msgNoti = new Notification('Personal Chat', {
+                body: 'You have new messages.',
+                icon: 'img/logo.png'
+            });
+            msgNoti.addEventListener('click', function(){
+                window.open(window.location.href);
+            });
+
+            socket.emit("save noti", {
+                type: 1, // 1 is for message, 2 is for call
+                room: room._id,
+                from: user._id,
+                to: CURRENT_USER_ID
+            });
         }
     });
 
     const selectTargetUser = (tragetId) => {
         location.href = `/chat/${tragetId}`;
     };
+
+    const showNoti = (room) => {
+        $(`#${room._id} .noti`).remove();
+        $(`#${room._id}`).append(`
+                <div class="noti badge badge-light float-right m-2 text-danger" style="font-size: 18px;">
+                    <i class="fas fa-bell"></i>
+                </div>`);
+    }
 
     const createUserCard = (user, room) => {
         return `<li ${room ? `id="${room._id}"` : ''} data-id="${user._id}" class="clearfix" onclick="showChat('${user._id}', this)">
@@ -179,9 +205,12 @@
         $("#js_search_result").empty();
         $.get(`/api/chat-room`,
             function (data, status) {
-                data.forEach((room) => {
+                data.rooms.forEach((room) => {
                     room.members.forEach((user) => {
                         $("#js_search_result").append(createUserCard(user, room));
+                        if (data.notiRooms.includes(room._id)) {
+                            showNoti(room);
+                        }
                     })
                 });
             }

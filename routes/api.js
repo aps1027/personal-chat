@@ -5,6 +5,7 @@ const router = express.Router();
 const User = require("../models/User");
 const Room = require("../models/Room");
 const Message = require("../models/Message");
+const Noti = require("../models/Noti");
 
 //@desc API/Search User
 //@route POST /api/user-search
@@ -63,7 +64,13 @@ router.get("/chat-room", async (req, res) => {
         },
       },
     ]);
-    res.json(rooms);
+
+    const notiRooms = await Noti.distinct("room", {
+      isSeen: false,
+      to: req.user._id,
+    });
+
+    res.json({ rooms, notiRooms });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err });
@@ -74,12 +81,12 @@ router.get("/chat-room", async (req, res) => {
 //@route POST /api/chat-room
 router.post("/chat-room", async (req, res) => {
   let chatRoom = null;
-  let targeTuser = req.body?.target_user;
+  let targetUser = req.body?.target_user;
   let currenTuser = req.body?.current_user;
 
   const members = [
     mongoose.Types.ObjectId(currenTuser),
-    mongoose.Types.ObjectId(targeTuser),
+    mongoose.Types.ObjectId(targetUser),
   ];
 
   try {
@@ -95,21 +102,24 @@ router.post("/chat-room", async (req, res) => {
     } else {
       chatRoom = await Room.create({ members: members });
     }
-    const targetUser = await User.findOne({
-      _id: mongoose.Types.ObjectId(targeTuser),
+    const targetUserInfo = await User.findOne({
+      _id: mongoose.Types.ObjectId(targetUser),
     }).lean();
 
     let lastMessage = await Message.find({
       room: mongoose.Types.ObjectId(chatRoom._id),
     })
       .sort({ $natural: -1 })
-      .limit(1).lean();
+      .limit(1)
+      .lean();
+
+    let endDate = lastMessage[0]?.createdAt
+      ? lastMessage[0].createdAt
+      : new Date();
+    endDate.setHours(23, 59, 59, 999);
 
     let startDate = new Date();
-    startDate.setDate(lastMessage[0].createdAt.getDate() - 2);
-
-    let endDate = lastMessage[0].createdAt;
-    endDate.setHours(23, 59, 59, 999);
+    startDate.setDate(endDate.getDate() - 2);
 
     const messages = await Message.find({
       room: mongoose.Types.ObjectId(chatRoom._id),
@@ -118,7 +128,17 @@ router.post("/chat-room", async (req, res) => {
         $lt: endDate,
       },
     });
-    res.json({ room: chatRoom, user: targetUser, messages: messages });
+
+    await Noti.updateMany(
+      {
+        room: mongoose.Types.ObjectId(chatRoom._id),
+        from: mongoose.Types.ObjectId(targetUser),
+        to: mongoose.Types.ObjectId(currenTuser),
+      },
+      { isSeen: true }
+    );
+
+    res.json({ room: chatRoom, user: targetUserInfo, messages: messages });
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: err });

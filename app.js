@@ -26,6 +26,7 @@ const server = http.createServer(app);
 const User = require("./models/User");
 const Room = require("./models/Room");
 const Message = require("./models/Message");
+const Noti = require("./models/Noti");
 
 const io = new Server(server);
 io.on("connection", (socket) => {
@@ -63,6 +64,15 @@ io.on("connection", (socket) => {
     socket
       .to(to)
       .emit("show noti", { room: targetRoom, user: targetUser, noti: true });
+  });
+
+  socket.on("save noti", async ({ type, room, from, to }) => {
+    Noti.create({
+      type: type,
+      room: mongoose.Types.ObjectId(room),
+      from: mongoose.Types.ObjectId(from),
+      to: mongoose.Types.ObjectId(to)
+    });
   });
 
   socket.on("disconnect", async () => {
