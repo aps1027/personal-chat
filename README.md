@@ -6,6 +6,7 @@ This is app for personal-chat (like skype).
 
 ## Development Procedures
 1) Clone this git repository
+1) Create config.env based on config.env.example
 1) Run dev server
     ```
     $ npm install
