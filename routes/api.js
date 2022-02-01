@@ -118,14 +118,12 @@ router.post("/chat-room", async (req, res) => {
       : new Date();
     endDate.setHours(23, 59, 59, 999);
 
-    let startDate = new Date();
-    startDate.setDate(endDate.getDate() - 2);
+    let startDate = endDate.setDate(endDate.getDate() - 2);
 
     const messages = await Message.find({
       room: mongoose.Types.ObjectId(chatRoom._id),
       createdAt: {
         $gte: startDate,
-        $lt: endDate,
       },
     });
 
@@ -145,27 +143,4 @@ router.post("/chat-room", async (req, res) => {
   }
 });
 
-//@desc API/Message By Room ID
-//@route POST /api/room-message/:id
-router.get("/room-message/:id", async (req, res) => {
-  try {
-    let startDate = new Date();
-    startDate.setDate(startDate.getDate() - 1);
-
-    let endDate = new Date();
-    endDate.setHours(23, 59, 59, 999);
-
-    const messages = await Message.find({
-      room: mongoose.Types.ObjectId(req.params.id),
-      createdAt: {
-        $gte: startDate,
-        $lt: endDate,
-      },
-    });
-    res.json(messages);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: err });
-  }
-});
 module.exports = router;
