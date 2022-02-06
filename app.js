@@ -30,19 +30,50 @@ const Noti = require("./models/Noti");
 
 const io = new Server(server);
 io.on("connection", (socket) => {
-  socket.on("user connect", async ({ user_id }) => {
-    socket.user_id = user_id;
-    await User.findByIdAndUpdate(user_id, { connected: true });
-    socket.join(user_id);
-    socket.broadcast.emit("user connected", {user: socket.user_id});
+  socket.on("user-connect", async ({ userId }) => {
+    socket.user_id = userId;
+    await User.findByIdAndUpdate(userId, { connected: true });
+    socket.join(userId);
+    socket.broadcast.emit("user-connected", { user: socket.user_id });
   });
 
-  socket.on("select room", async ({ room_id }) => {
-    socket.join(room_id);
+  socket.on("select-room", async ({ roomId }) => {
+    socket.join(roomId);
   });
 
-  socket.on("send message", async ({ message, roomId, from, to }) => {
-    socket.to(roomId).emit("private message", {
+  socket.on("pre-offer", async (data) => {
+    const { calleePersonalCode, callType } = data;
+    let targetUser = await User.findOne({
+      _id: mongoose.Types.ObjectId(calleePersonalCode),
+    }).lean();
+    if (targetUser.connected) {
+      socket.to(calleePersonalCode).emit("pre-offer", {
+        callerSocketId: socket.user_id,
+        callType,
+      });
+    } else {
+      const data = {
+        preOfferAnswer: "CALL_UNAVAILABLE",
+      };
+      console.log(data);
+      socket.emit("pre-offer-answer", data);
+    }
+  });
+
+  socket.on("pre-offer-answer", async (data) => {
+    const { callerSocketId } = data;
+
+    socket.to(callerSocketId).emit("pre-offer-answer", data);
+  });
+
+  socket.on("webRTC-signaling", async (data) => {
+    const { connectedUserSocketId } = data;
+
+    socket.to(connectedUserSocketId).emit("webRTC-signaling", data);
+  });
+
+  socket.on("send-message", async ({ message, roomId, from, to }) => {
+    socket.to(roomId).emit("private-message", {
       message,
       from,
       roomId,
@@ -63,24 +94,28 @@ io.on("connection", (socket) => {
 
     socket
       .to(to)
-      .emit("show noti", { room: targetRoom, user: targetUser, noti: true });
+      .emit("show-noti", { room: targetRoom, user: targetUser, noti: true });
   });
 
-  socket.on("save noti", async ({ type, room, from, to }) => {
+  socket.on("save-noti", async ({ type, roomId, from, to }) => {
     Noti.create({
       type: type,
-      room: mongoose.Types.ObjectId(room),
+      room: mongoose.Types.ObjectId(roomId),
       from: mongoose.Types.ObjectId(from),
-      to: mongoose.Types.ObjectId(to)
+      to: mongoose.Types.ObjectId(to),
     });
+  });
+
+  socket.on("user-hanged-up", (data) => {
+    const { connectedUserSocketId } = data;
+    socket.to(connectedUserSocketId).emit("user-hanged-up");
   });
 
   socket.on("disconnect", async () => {
     if (socket.user_id) {
       await User.findByIdAndUpdate(socket.user_id, { connected: false });
-      socket.broadcast.emit("user disconnected", {user: socket.user_id});
+      socket.broadcast.emit("user-disconnected", { user: socket.user_id });
     }
-    console.log("user disconnected");
   });
 });
 

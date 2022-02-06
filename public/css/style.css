@@ -198,6 +198,23 @@ button:focus {
   height: 0;
 }
 
+.video {
+  background: #000;
+  min-height: 600px;
+  margin: 20px;
+  z-index: 999;
+  position: relative;
+  display: none;
+}
+
+.local-video {
+  position: absolute;
+  width: 200px;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
 @media only screen and (min-width: 768px) and (max-width: 992px) {
   .chat-app .chat {
     height: 753px;
