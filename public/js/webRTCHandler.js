@@ -5,20 +5,27 @@ const defaultConstraints = {
 
 const configuration = {
   iceServers: [
-    {   
-      urls: [ "stun:ss-turn2.xirsys.com" ]
-    }, 
-    {  
-      username: "J7VWVgtwsmONXUYCzUwZgCI9rAUZxjrNCSTWv8k-sa-b86VQ5zESBIXrz5ESOzqVAAAAAGIA4DxBdW5nUHlhZVNvbmU=",
-      credential: "bb634716-87f4-11ec-8468-0242ac140004",
-      urls: [
-        "turn:ss-turn2.xirsys.com:80?transport=udp",
-        "turn:ss-turn2.xirsys.com:3478?transport=udp",
-        "turn:ss-turn2.xirsys.com:80?transport=tcp",
-        "turn:ss-turn2.xirsys.com:3478?transport=tcp",
-        "turns:ss-turn2.xirsys.com:443?transport=tcp",
-        "turns:ss-turn2.xirsys.com:5349?transport=tcp"
-      ]
+    {
+      url: 'stun:global.stun.twilio.com:3478?transport=udp',
+      urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+    },
+    {
+      url: 'turn:global.turn.twilio.com:3478?transport=udp',
+      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
+      urls: 'turn:global.turn.twilio.com:3478?transport=udp',
+      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
+    },
+    {
+      url: 'turn:global.turn.twilio.com:3478?transport=tcp',
+      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
+      urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
+      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
+    },
+    {
+      url: 'turn:global.turn.twilio.com:443?transport=tcp',
+      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
+      urls: 'turn:global.turn.twilio.com:443?transport=tcp',
+      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
     }
   ]
 };
