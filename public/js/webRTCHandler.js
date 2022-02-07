@@ -5,15 +5,22 @@ const defaultConstraints = {
 
 const configuration = {
   iceServers: [
-    {
-      urls: "stun:stun.1.google.com:13902",
-    },
-    {
-      urls: 'turn:numb.viagenie.ca',
-      credential: 'muazkh',
-      username: 'webrtc@live.com'
+    {   
+      urls: [ "stun:ss-turn2.xirsys.com" ]
+    }, 
+    {  
+      username: "J7VWVgtwsmONXUYCzUwZgCI9rAUZxjrNCSTWv8k-sa-b86VQ5zESBIXrz5ESOzqVAAAAAGIA4DxBdW5nUHlhZVNvbmU=",
+      credential: "bb634716-87f4-11ec-8468-0242ac140004",
+      urls: [
+        "turn:ss-turn2.xirsys.com:80?transport=udp",
+        "turn:ss-turn2.xirsys.com:3478?transport=udp",
+        "turn:ss-turn2.xirsys.com:80?transport=tcp",
+        "turn:ss-turn2.xirsys.com:3478?transport=tcp",
+        "turns:ss-turn2.xirsys.com:443?transport=tcp",
+        "turns:ss-turn2.xirsys.com:5349?transport=tcp"
+      ]
     }
-  ],
+  ]
 };
 
 const getLocalPreview = () => {
