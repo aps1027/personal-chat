@@ -8,6 +8,11 @@ const configuration = {
     {
       urls: "stun:stun.1.google.com:13902",
     },
+    {
+      urls: 'turn:numb.viagenie.ca',
+      credential: 'muazkh',
+      username: 'webrtc@live.com'
+    }
   ],
 };
 
