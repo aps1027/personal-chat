@@ -2,9 +2,16 @@ let connectedUserDetails;
 let peerConnection;
 
 const callVideo = (userId, userName, userImg) => {
-  const callType = "VIDEO_PERSONAL_CODE";
-  sendPreOffer(callType, userId);
+  showOrHideCallingModal_UI(true, userId, userName, userImg);
+  getLocalPreview();
+  sendPreOffer(userId);
 };
+
+const cancelCall = (userId) => {
+  sendCancelPreoffer(userId);
+  handleCancelCalling();
+  showOrHideCallingModal_UI();
+}
 
 const hangupCall = () => {
   handleHangUp();
@@ -56,8 +63,6 @@ const showFriendList = () => {
 };
 
 sendUserConnect_WSS();
-
-getLocalPreview();
 
 showFriendList();
 

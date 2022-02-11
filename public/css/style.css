@@ -39,7 +39,7 @@ button:focus {
 
 .profile div {
   height: 48px;
-    padding: 12px;
+  padding: 12px;
 }
 
 .people-list {
@@ -213,6 +213,49 @@ button:focus {
   top: 20px;
   left: 20px;
   z-index: 1;
+}
+
+.calling,
+.call-request {
+  position: absolute;
+  width: 300px;
+  height: 350px;
+  z-index: 15;
+  top: 30%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+}
+
+.target-profile img {
+  width: 120px;
+  border-radius: 50%;
+}
+
+.target-profile h2 {
+  white-space: nowrap;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video .video-btn-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+}
+
+.video .hungup-btn {
+  position: relative;
+  left: -50%;
+}
+
+.hungup-btn {
+  width: 150px;
+}
+
+.accept-btn,
+.reject-btn {
+  width: 90px;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 992px) {

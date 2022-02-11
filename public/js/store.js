@@ -5,7 +5,7 @@ let state = {
   screenSharingActive: false,
   screenSharingStream: null,
   allowConnectionFromStrangers: false,
-  callState: "CALL_AVAILABLE_ONLY_CHAT",
+  callState: "CALL_AVAILABLE",
 };
 
 const setRoomId = (id) => {
