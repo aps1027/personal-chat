@@ -6,28 +6,31 @@ const defaultConstraints = {
 const configuration = {
   iceServers: [
     {
-      url: 'stun:global.stun.twilio.com:3478?transport=udp',
-      urls: 'stun:global.stun.twilio.com:3478?transport=udp'
+      url: "stun:global.stun.twilio.com:3478?transport=udp",
+      urls: "stun:global.stun.twilio.com:3478?transport=udp",
     },
     {
-      url: 'turn:global.turn.twilio.com:3478?transport=udp',
-      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
-      urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
+      url: "turn:global.turn.twilio.com:3478?transport=udp",
+      username:
+        "4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392",
+      urls: "turn:global.turn.twilio.com:3478?transport=udp",
+      credential: "N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8=",
     },
     {
-      url: 'turn:global.turn.twilio.com:3478?transport=tcp',
-      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
-      urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
+      url: "turn:global.turn.twilio.com:3478?transport=tcp",
+      username:
+        "4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392",
+      urls: "turn:global.turn.twilio.com:3478?transport=tcp",
+      credential: "N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8=",
     },
     {
-      url: 'turn:global.turn.twilio.com:443?transport=tcp',
-      username: '4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392',
-      urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-      credential: 'N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8='
-    }
-  ]
+      url: "turn:global.turn.twilio.com:443?transport=tcp",
+      username:
+        "4c033d765307fa9084b85f0529a9b3b1b538bb7e9bfa506d8e47be3e90dc5392",
+      urls: "turn:global.turn.twilio.com:443?transport=tcp",
+      credential: "N3ZkYsI5SWcPtmHUyya41aBgXq/SfEZaKDSVfs9NdQ8=",
+    },
+  ],
 };
 
 const getLocalPreview = () => {
@@ -134,16 +137,28 @@ const sendPreOfferAnswer = (preOfferAnswer, callerSockerId = null) => {
   sendPreOfferAnswer_WSS(data);
 };
 
+const handleCameraAccess = () => {
+  navigator.permissions.query({ name: "camera" }).then((res) => {
+    if (res.state === "granted") {
+      setTimeout(() => {
+        createPeerConnection();
+        sendPreOfferAnswer("CALL_ACCEPTED");
+        showOrHideCallSection_UI();
+        showOrHideCallRequestModel_UI();
+      }, 1000);
+    }else if(res.state === "prompt") {
+      handleCameraAccess();
+    } else {
+      alert("Please granted Camera Permission");
+    }
+  });
+}
+
 const acceptCallHandler = () => {
   console.log("call accepted");
 
   getLocalPreview();
-  setTimeout(() => {
-    createPeerConnection();
-    sendPreOfferAnswer("CALL_ACCEPTED");
-    showOrHideCallSection_UI();
-    showOrHideCallRequestModel_UI();
-  }, 1000);
+  handleCameraAccess();
 };
 
 const setIncomingCallsAvailable = () => {
