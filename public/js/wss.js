@@ -37,6 +37,10 @@ socket.on("show-noti", ({ room, user, noti }) => {
   }
 });
 
+socket.on("cancel-pre-offer", (data) => {
+  handlerCancelPreOffer(data);
+});
+
 socket.on("pre-offer", (data) => {
   handlerPreOffer(data);
 });
@@ -94,7 +98,9 @@ const sendSaveNoti_WSS = (type, roomId, from, to) => {
     to: to,
   });
 };
-
+const sendCancelPreOffer_WSS = (data) => {
+  socket.emit("cancel-pre-offer", data);
+}
 const sendPreOffer_WSS = (data) => {
   socket.emit("pre-offer", data);
 };

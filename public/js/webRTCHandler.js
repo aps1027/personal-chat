@@ -85,46 +85,40 @@ const createPeerConnection = () => {
   };
 
   // add our stream to peer connection
-  if (connectedUserDetails.callType === "VIDEO_PERSONAL_CODE") {
-    const localStream = getState().localStream;
+  const localStream = getState().localStream;
 
-    for (const track of localStream.getTracks()) {
-      peerConnection.addTrack(track, localStream);
-    }
+  for (const track of localStream.getTracks()) {
+    peerConnection.addTrack(track, localStream);
   }
 };
 
-const sendPreOffer = (callType, calleePersonalCode) => {
+const sendPreOffer = (calleePersonalCode) => {
   connectedUserDetails = {
-    callType,
     socketId: calleePersonalCode,
   };
-  if (callType === "CHAT_PERSONAL_CODE" || callType === "VIDEO_PERSONAL_CODE") {
-    const data = {
-      callType,
-      calleePersonalCode,
-    };
-    alert("calling...");
+  const data = {
+    calleePersonalCode,
+  };
 
-    setCallState("CALL_UNAVAILABLE");
+  setCallState("CALL_UNAVAILABLE");
 
-    console.log("emmiting to server pre offer event");
-    sendPreOffer_WSS(data);
-  }
+  console.log("emmiting to server pre offer event");
+  sendPreOffer_WSS(data);
 };
 
-const checkCallPossibility = (callType) => {
+const sendCancelPreoffer = (calleePersonalCode) => {
+  setCallState("CALL_AVAILABLE");
+  const data = {
+    calleePersonalCode,
+  };
+  sendCancelPreOffer_WSS(data);
+};
+
+const checkCallPossibility = () => {
   const callState = getState().callState;
 
   if (callState === "CALL_AVAILABLE") {
     return true;
-  }
-
-  if (
-    (callType === "VIDEO_PERSONAL_CODE" || callType === "VIDEO_STRANGER") &&
-    callState === "CALL_AVAILABLE_ONLY_CHAT"
-  ) {
-    return false;
   }
   return false;
 };
@@ -142,28 +136,29 @@ const sendPreOfferAnswer = (preOfferAnswer, callerSockerId = null) => {
 
 const acceptCallHandler = () => {
   console.log("call accepted");
-  createPeerConnection();
-  sendPreOfferAnswer("CALL_ACCEPTED");
-  showOrHideCallSection_UI();
+
+  getLocalPreview();
+  setTimeout(() => {
+    createPeerConnection();
+    sendPreOfferAnswer("CALL_ACCEPTED");
+    showOrHideCallSection_UI();
+    showOrHideCallRequestModel_UI();
+  }, 1000);
 };
 
 const setIncomingCallsAvailable = () => {
-  const localStream = getState().localStream;
-  if (localStream) {
-    setCallState("CALL_AVAILABLE");
-  } else {
-    setCallState("CALL_AVAILABLE_ONLY_CHAT");
-  }
+  setCallState("CALL_AVAILABLE");
 };
 
 const rejectCallHandler = () => {
   console.log("reject accepted");
   setIncomingCallsAvailable();
   sendPreOfferAnswer("CALL_REJECTED");
+  showOrHideCallRequestModel_UI();
 };
 
 const handlerPreOffer = (data) => {
-  const { callType, callerSocketId } = data;
+  const { callerSocketId, callerName, callerImg } = data;
 
   if (!checkCallPossibility()) {
     return sendPreOfferAnswer("CALL_UNAVAIABLE", callerSocketId);
@@ -171,18 +166,19 @@ const handlerPreOffer = (data) => {
 
   connectedUserDetails = {
     socketId: callerSocketId,
-    callType,
   };
 
   setCallState("CALL_UNAVAILABLE");
 
-  if (callType === "CHAT_PERSONAL_CODE" || callType === "VIDEO_PERSONAL_CODE") {
-    if (confirm("Calling From someone")) {
-      acceptCallHandler();
-    } else {
-      rejectCallHandler();
-    }
-  }
+  console.log("caling ....");
+  showOrHideCallRequestModel_UI(
+    true,
+    callerSocketId,
+    callerName,
+    callerImg,
+    acceptCallHandler,
+    rejectCallHandler
+  );
 };
 
 const sendWebRTCOffer = async () => {
@@ -196,6 +192,11 @@ const sendWebRTCOffer = async () => {
   sendDataUsingWebRTCSignaling_WSS(data);
 };
 
+const handlerCancelPreOffer = () => {
+  setIncomingCallsAvailable();
+  showOrHideCallRequestModel_UI();
+};
+
 const handlerPreOfferAnswer = (data) => {
   const { preOfferAnswer } = data;
 
@@ -206,13 +207,14 @@ const handlerPreOfferAnswer = (data) => {
 
   if (preOfferAnswer === "CALL_REJECTED") {
     setIncomingCallsAvailable();
-    alert("Call rejected");
+    showOrHideCallingModal_UI();
   }
 
   if (preOfferAnswer === "CALL_ACCEPTED") {
     createPeerConnection();
     sendWebRTCOffer();
     showOrHideCallSection_UI();
+    showOrHideCallingModal_UI();
   }
 };
 
@@ -245,6 +247,14 @@ const handleWebRTCCandidate = async (data) => {
   }
 };
 
+const stopStreamedVideo = (stream) => {
+  const tracks = stream.getTracks();
+
+  tracks.forEach(function (track) {
+    track.stop();
+  });
+};
+
 const handleHangUp = () => {
   const data = {
     connectedUserSocketId: connectedUserDetails.socketId,
@@ -257,6 +267,10 @@ const handlerConnectedUserHangedUp = () => {
   closePeerConnectionAndResetState();
 };
 
+const handleCancelCalling = () => {
+  stopStreamedVideo(getState().localStream);
+};
+
 const closePeerConnectionAndResetState = () => {
   if (peerConnection) {
     peerConnection.close();
@@ -264,13 +278,7 @@ const closePeerConnectionAndResetState = () => {
   }
 
   // active mic and camera
-  if (
-    connectedUserDetails.callType === "VIDEO_PERSONAL_CODE" ||
-    connectedUserDetails.callType === "CHAT_PERSONAL_CODE"
-  ) {
-    getState().localStream.getVideoTracks()[0].enabled = true;
-    getState().localStream.getAudioTracks()[0].enabled = true;
-  }
+  stopStreamedVideo(getState().localStream);
 
   showOrHideCallSection_UI(false);
   setIncomingCallsAvailable();

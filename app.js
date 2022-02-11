@@ -41,21 +41,32 @@ io.on("connection", (socket) => {
     socket.join(roomId);
   });
 
+  socket.on("cancel-pre-offer", async (data) => {
+    const { calleePersonalCode } = data;
+    socket.to(calleePersonalCode).emit("cancel-pre-offer", {
+      callerSocketId: socket.user_id,
+    });
+  })
+
   socket.on("pre-offer", async (data) => {
-    const { calleePersonalCode, callType } = data;
+    const { calleePersonalCode } = data;
     let targetUser = await User.findOne({
       _id: mongoose.Types.ObjectId(calleePersonalCode),
+    }).lean();
+
+    let currentUser = await User.findOne({
+      _id: mongoose.Types.ObjectId(socket.user_id),
     }).lean();
     if (targetUser.connected) {
       socket.to(calleePersonalCode).emit("pre-offer", {
         callerSocketId: socket.user_id,
-        callType,
+        callerName: currentUser.displayName,
+        callerImg: currentUser.image,
       });
     } else {
       const data = {
         preOfferAnswer: "CALL_UNAVAILABLE",
       };
-      console.log(data);
       socket.emit("pre-offer-answer", data);
     }
   });

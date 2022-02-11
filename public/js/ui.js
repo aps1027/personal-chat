@@ -34,6 +34,71 @@ const showNoti_UI = (room) => {
                   </div>`);
 };
 
+const showOrHideCallingModal_UI = (show = false, id, name, image) => {
+  $("#js_calling_modal").remove();
+  if (show) {
+    $("#js_container").append(`
+      <div class="calling card bg-light" id="js_calling_modal">
+        <div class="card-body">
+            <div class="target-profile text-center m-4">
+                <img src="${image}" alt="avatar" referrerpolicy="no-referrer" />
+                <div class="m-2">
+                    <h2>${name}</h2>
+                </div>
+                <div>
+                    <h5>Calling...</h5>
+                </div>
+                <div class="m-4">
+                    <a class="btn btn-danger hungup-btn" onclick="cancelCall('${id}')">
+                        <i class="fa fa-phone"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </div>
+    `);
+  }
+};
+
+const showOrHideCallRequestModel_UI = (
+  show = false,
+  id,
+  name,
+  image,
+  acceptCallHandler,
+  rejectCallHandler
+) => {
+  $("#js_call_request_modal").remove();
+  if (show) {
+    $("#js_container").append(`
+      <div class="call-request card bg-light" id="js_call_request_modal">
+        <div class="card-body">
+            <div class="target-profile text-center m-4">
+                <img src="${image}" alt="avatar" referrerpolicy="no-referrer" />
+                <div class="m-2">
+                    <h2>${name}</h2>
+                </div>
+                <div>
+                    <h5>is calling to you</h5>
+                </div>
+                <div class="row my-4 mx-2">
+                <a class="btn btn-success accept-btn mr-3" id="js_call_accepted">
+                        Accept
+                    </a>
+                    <a class="btn btn-danger reject-btn" id="js_call_rejected">
+                        <i class="fa fa-phone"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+      </div>
+    `);
+
+    $("#js_call_accepted").on("click", acceptCallHandler);
+    $("#js_call_rejected").on("click", rejectCallHandler);
+  }
+};
+
 const createUserCard_UI = (user, room) => {
   return `<li ${room ? `id="${room._id}"` : ""} data-id="${
     user._id
@@ -78,8 +143,8 @@ const showChatHeader_UI = (user) => {
                       <div class="float-right">
                           <a class="btn badge badge-light p-3 rounded-circle" id="js_video_call"
                               onclick="callVideo('${user._id}', '${
-    user.image
-  }', '${user.displayName}')">
+    user.displayName
+  }', '${user.image}')">
                                   <i class="fa fa-video"></i>
                           </a>
                       </div>
