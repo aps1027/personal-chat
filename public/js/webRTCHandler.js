@@ -146,13 +146,13 @@ const handleCameraAccess = () => {
         showOrHideCallSection_UI();
         showOrHideCallRequestModel_UI();
       }, 1000);
-    }else if(res.state === "prompt") {
+    } else if (res.state === "prompt") {
       handleCameraAccess();
     } else {
       alert("Please granted Camera Permission");
     }
   });
-}
+};
 
 const acceptCallHandler = () => {
   console.log("call accepted");
@@ -196,6 +196,14 @@ const handlerPreOffer = (data) => {
   );
 };
 
+const stopStreamedVideo = (stream) => {
+  const tracks = stream.getTracks();
+
+  tracks.forEach(function (track) {
+    track.stop();
+  });
+};
+
 const sendWebRTCOffer = async () => {
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
@@ -223,6 +231,7 @@ const handlerPreOfferAnswer = (data) => {
   if (preOfferAnswer === "CALL_REJECTED") {
     setIncomingCallsAvailable();
     showOrHideCallingModal_UI();
+    stopStreamedVideo(getState().localStream);
   }
 
   if (preOfferAnswer === "CALL_ACCEPTED") {
@@ -262,14 +271,6 @@ const handleWebRTCCandidate = async (data) => {
   }
 };
 
-const stopStreamedVideo = (stream) => {
-  const tracks = stream.getTracks();
-
-  tracks.forEach(function (track) {
-    track.stop();
-  });
-};
-
 const handleHangUp = () => {
   const data = {
     connectedUserSocketId: connectedUserDetails.socketId,
@@ -294,8 +295,76 @@ const closePeerConnectionAndResetState = () => {
 
   // active mic and camera
   stopStreamedVideo(getState().localStream);
-
+  if (getState().screenSharingStream) {
+    stopStreamedVideo(getState().screenSharingStream);
+  }
+  setScreenSharingActive(false);
+  setScreenSharingStream(null);
+  showOrHideScreenSharing_UI(false);
   showOrHideCallSection_UI(false);
   setIncomingCallsAvailable();
   connectedUserDetails = null;
+};
+
+let screenSharingStream;
+
+const endStopScreenSharing = (screenSharingActive) => {
+  const localStream = getState().localStream;
+  const senders = peerConnection.getSenders();
+
+  const sender = senders.find((sender) => {
+    return sender.track.kind === localStream.getVideoTracks()[0].kind;
+  });
+
+  if (sender) {
+    sender.replaceTrack(localStream.getVideoTracks()[0]);
+  }
+
+  getState()
+    .screenSharingStream.getTracks()
+    .forEach((track) => track.stop());
+
+  setScreenSharingActive(!screenSharingActive);
+  showOrHideScreenSharing_UI(false);
+};
+
+const switchBetweenCameraAndScreenSharing = async (screenSharingActive) => {
+  if (screenSharingActive) {
+    endStopScreenSharing(screenSharingActive);
+  } else {
+    console.log("switching for screen sharing");
+    try {
+      screenSharingStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+      });
+      setScreenSharingStream(screenSharingStream);
+
+      // replace track which sender is sending
+      const senders = peerConnection.getSenders();
+
+      const sender = senders.find((sender) => {
+        return (
+          sender.track.kind === screenSharingStream.getVideoTracks()[0].kind
+        );
+      });
+
+      if (sender) {
+        sender.replaceTrack(screenSharingStream.getVideoTracks()[0]);
+      }
+
+      setScreenSharingActive(!screenSharingActive);
+      showOrHideScreenSharing_UI();
+
+      // ui.updateLocalVideo(screenSharingStream);
+
+      screenSharingStream.getVideoTracks()[0].addEventListener("ended", () => {
+        endStopScreenSharing(screenSharingActive);
+      });
+    } catch (err) {
+      console.error(
+        "error occured when trying to get screen sharing stream",
+        err
+      );
+    }
+  }
 };

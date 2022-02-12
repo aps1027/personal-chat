@@ -4,7 +4,6 @@ let state = {
   remoteStream: null,
   screenSharingActive: false,
   screenSharingStream: null,
-  allowConnectionFromStrangers: false,
   callState: "CALL_AVAILABLE",
 };
 
@@ -20,13 +19,6 @@ const setLocalStream = (stream) => {
   state = {
     ...state,
     localStream: stream,
-  };
-};
-
-const setAllowConnectionFromStrangers = (allowConnection) => {
-  state = {
-    ...state,
-    allowConnectionFromStrangers: allowConnection,
   };
 };
 

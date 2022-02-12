@@ -17,6 +17,11 @@ const hangupCall = () => {
   handleHangUp();
 };
 
+const shareScreen = () => {
+  const screenSharingActive = getState().screenSharingActive;
+  switchBetweenCameraAndScreenSharing(screenSharingActive);
+}
+
 const selectTargetUser = (tragetId) => {
   location.href = `/chat/${tragetId}`;
 };

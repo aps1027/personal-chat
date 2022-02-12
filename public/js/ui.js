@@ -49,7 +49,7 @@ const showOrHideCallingModal_UI = (show = false, id, name, image) => {
                     <h5>Calling...</h5>
                 </div>
                 <div class="m-4">
-                    <a class="btn btn-danger hungup-btn" onclick="cancelCall('${id}')">
+                    <a class="btn btn-danger hangup-btn" onclick="cancelCall('${id}')">
                         <i class="fa fa-phone"></i>
                     </a>
                 </div>
@@ -185,5 +185,13 @@ const showOrHideCallSection_UI = (show = true) => {
   } else {
     $("#js_call_section").hide();
     $("#js_message_section").show();
+  }
+};
+
+const showOrHideScreenSharing_UI = (show = true) => {
+  if (show) {
+    $("#js_screen_share_status").show();
+  } else {
+    $("#js_screen_share_status").hide();
   }
 };

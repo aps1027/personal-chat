@@ -244,12 +244,27 @@ button:focus {
   left: 50%;
 }
 
-.video .hungup-btn {
+.video .btn-group {
   position: relative;
   left: -50%;
 }
 
-.hungup-btn {
+.video .screen-sharing-status {
+  position: relative;
+  left: -50%;
+  text-align: center;
+  color: #1e7e34;
+  height: 35px;
+  display: none;
+}
+
+.video .btn-group .btn {
+  border-radius: 50% !important;
+  width: 45px;
+  height: 45px;
+}
+
+.calling .hangup-btn {
   width: 150px;
 }
 
