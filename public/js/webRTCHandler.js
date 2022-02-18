@@ -386,9 +386,9 @@ const handleMutingMic = () => {
   const audioTrack = localStream
     .getTracks()
     .find((track) => track.kind === "audio");
-  if (audioTrack.muted) {
-    audioTrack.muted = false;
+  if (audioTrack.enabled) {
+    audioTrack.enabled = false;
   } else {
-    audioTrack.muted = true;
+    audioTrack.enabled = true;
   }
 };
