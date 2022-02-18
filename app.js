@@ -46,7 +46,7 @@ io.on("connection", (socket) => {
     socket.to(calleePersonalCode).emit("cancel-pre-offer", {
       callerSocketId: socket.user_id,
     });
-  })
+  });
 
   socket.on("pre-offer", async (data) => {
     const { calleePersonalCode } = data;
@@ -120,6 +120,20 @@ io.on("connection", (socket) => {
   socket.on("user-hanged-up", (data) => {
     const { connectedUserSocketId } = data;
     socket.to(connectedUserSocketId).emit("user-hanged-up");
+  });
+
+  socket.on("mute-camera", async (data) => {
+    const { calleePersonalCode, mute } = data;
+    socket.to(calleePersonalCode).emit("mute-camera", {
+      mute,
+    });
+  });
+
+  socket.on("mute-mic", async (data) => {
+    const { calleePersonalCode, mute } = data;
+    socket.to(calleePersonalCode).emit("mute-mic", {
+      mute,
+    });
   });
 
   socket.on("disconnect", async () => {

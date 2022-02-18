@@ -268,9 +268,29 @@ button:focus {
   width: 150px;
 }
 
+.hangup-btn i, .reject-btn i {
+  transform: rotate(225deg);
+ }
+
 .accept-btn,
 .reject-btn {
   width: 90px;
+}
+
+.call-status {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+}
+
+.call-status span {
+  background: #808080;
+  border-radius: 50%;
+  margin: 2px;
+  width: 33px;
+  text-align: center;
+  display: none;
 }
 
 @media only screen and (min-width: 768px) and (max-width: 992px) {

@@ -69,6 +69,15 @@ socket.on("user-hanged-up", () => {
   handlerConnectedUserHangedUp();
 });
 
+socket.on("mute-mic", (data) => {
+  changeRemoteMicStatus_UI(data.mute);
+});
+
+
+socket.on("mute-camera", (data) => {
+  changeRemoteVideoStatus_UI(data.mute);
+});
+
 const sendUserConnect_WSS = () => {
   socket.emit("user-connect", {
     userId: CURRENT_USER_ID,
@@ -116,3 +125,11 @@ const sendDataUsingWebRTCSignaling_WSS = (data) => {
 const sendUserHangedUp_WSS = (data) => {
   socket.emit("user-hanged-up", data);
 };
+
+const sendMutingCameraStatus_WSS = (data) => {
+  socket.emit("mute-camera", data);
+}
+
+const sendMutingMicStatus_WSS = (data) => {
+  socket.emit("mute-mic", data);
+}
