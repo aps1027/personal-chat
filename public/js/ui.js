@@ -83,7 +83,7 @@ const showOrHideCallRequestModel_UI = (
                 </div>
                 <div class="row my-4 mx-2">
                 <a class="btn btn-success accept-btn mr-3" id="js_call_accepted">
-                        Accept
+                        <i class="fa fa-phone"></i>
                     </a>
                     <a class="btn btn-danger reject-btn" id="js_call_rejected">
                         <i class="fa fa-phone"></i>
@@ -193,5 +193,37 @@ const showOrHideScreenSharing_UI = (show = true) => {
     $("#js_screen_share_status").show();
   } else {
     $("#js_screen_share_status").hide();
+  }
+};
+
+const muteMic_UI = (mute = true) => {
+  if (mute) {
+    $("#js_mic_btn_ico")[0].className = "fa fa-microphone-slash py-2";
+  } else {
+    $("#js_mic_btn_ico")[0].className = "fa fa-microphone py-2";
+  }
+};
+
+const muteVideo_UI = (mute = true) => {
+  if (mute) {
+    $("#js_video_btn_ico")[0].className = "fa fa-video-slash py-2";
+  } else {
+    $("#js_video_btn_ico")[0].className = "fa fa-video py-2";
+  }
+};
+
+const changeRemoteMicStatus_UI = (mute = true) => {
+  if (mute) {
+    $("#js_remote_mic_status").css("display", "inline-block");
+  } else {
+    $("#js_remote_mic_status").css("display", "none");
+  }
+};
+
+const changeRemoteVideoStatus_UI = (mute = true) => {
+  if (mute) {
+    $("#js_remote_video_status").css("display", "inline-block");
+  } else {
+    $("#js_remote_video_status").css("display", "none");
   }
 };

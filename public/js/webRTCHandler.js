@@ -142,6 +142,10 @@ const handleCameraAccess = () => {
     if (res.state === "granted") {
       setTimeout(() => {
         createPeerConnection();
+        muteMic_UI(false);
+        muteVideo_UI(false);
+        changeRemoteMicStatus_UI(false);
+        changeRemoteVideoStatus_UI(false);
         sendPreOfferAnswer("CALL_ACCEPTED");
         showOrHideCallSection_UI();
         showOrHideCallRequestModel_UI();
@@ -236,6 +240,10 @@ const handlerPreOfferAnswer = (data) => {
 
   if (preOfferAnswer === "CALL_ACCEPTED") {
     createPeerConnection();
+    muteMic_UI(false);
+    muteVideo_UI(false);
+    changeRemoteMicStatus_UI(false);
+    changeRemoteVideoStatus_UI(false);
     sendWebRTCOffer();
     showOrHideCallSection_UI();
     showOrHideCallingModal_UI();
@@ -376,8 +384,18 @@ const handleMutingCamera = () => {
     .find((track) => track.kind === "video");
   if (videoTrack.enabled) {
     videoTrack.enabled = false;
+    muteVideo_UI(true);
+    sendMutingCameraStatus_WSS({
+      calleePersonalCode: connectedUserDetails.socketId,
+      mute: true,
+    });
   } else {
     videoTrack.enabled = true;
+    muteVideo_UI(false);
+    sendMutingCameraStatus_WSS({
+      calleePersonalCode: connectedUserDetails.socketId,
+      mute: false,
+    });
   }
 };
 
@@ -388,7 +406,17 @@ const handleMutingMic = () => {
     .find((track) => track.kind === "audio");
   if (audioTrack.enabled) {
     audioTrack.enabled = false;
+    muteMic_UI(true);
+    sendMutingMicStatus_WSS({
+      calleePersonalCode: connectedUserDetails.socketId,
+      mute: true,
+    });
   } else {
     audioTrack.enabled = true;
+    muteMic_UI(false);
+    sendMutingMicStatus_WSS({
+      calleePersonalCode: connectedUserDetails.socketId,
+      mute: false,
+    });
   }
 };

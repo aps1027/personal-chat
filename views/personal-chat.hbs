@@ -1,21 +1,27 @@
 <div class="video" id="js_call_section">
     <div class="local-video"><video style="width: 100%; height: 150px;" id="js_local_video"
             class="border border-primary" muted autoplay></video></div>
+    <div class="call-status">
+        <span class="badge badge-light" id="js_remote_mic_status">
+            <i class="fa fa-microphone-slash py-2"></i></span>
+        <span class="badge badge-light" id="js_remote_video_status">
+            <i class="fa fa-video-slash py-2"></i></span>
+    </div>
     <div class="remote-video"><video style="width: 100%; height: 600px;" id="js_remote_video" autoplay></video>
     </div>
     <div class="video-btn-bar">
         <div class="screen-sharing-status" id="js_screen_share_status">Now, you are presenting...</div>
         <div class="btn-group">
             <a class="btn btn-light mx-1" onclick="muteCamera()">
-                <i class="fa fa-camera py-2"></i>
+                <i class="fa fa-video py-2" id="js_video_btn_ico"></i>
             </a>
             <a class="btn btn-light mx-1" onclick="muteMic()">
-                <i class="fa fa-microphone py-2"></i>
+                <i class="fa fa-microphone py-2" id="js_mic_btn_ico"></i>
             </a>
             <a class="btn btn-light mx-1" onclick="shareScreen()">
                 <i class="fa fa-retweet py-2"></i>
             </a>
-            <a class="btn btn-danger mx-1" onclick="hangupCall()">
+            <a class="btn btn-danger mx-1 hangup-btn" onclick="hangupCall()">
                 <i class="fa fa-phone py-2"></i>
             </a>
         </div>
