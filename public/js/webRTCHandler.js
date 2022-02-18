@@ -368,3 +368,27 @@ const switchBetweenCameraAndScreenSharing = async (screenSharingActive) => {
     }
   }
 };
+
+const handleMutingCamera = () => {
+  const localStream = getState().localStream;
+  const videoTrack = localStream
+    .getTracks()
+    .find((track) => track.kind === "video");
+  if (videoTrack.enabled) {
+    videoTrack.enabled = false;
+  } else {
+    videoTrack.enabled = true;
+  }
+};
+
+const handleMutingMic = () => {
+  const localStream = getState().localStream;
+  const audioTrack = localStream
+    .getTracks()
+    .find((track) => track.kind === "audio");
+  if (audioTrack.muted) {
+    audioTrack.muted = false;
+  } else {
+    audioTrack.muted = true;
+  }
+};

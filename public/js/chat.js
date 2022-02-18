@@ -22,6 +22,14 @@ const shareScreen = () => {
   switchBetweenCameraAndScreenSharing(screenSharingActive);
 }
 
+const muteCamera = () => {
+  handleMutingCamera();
+}
+
+const muteMic = () => {
+  handleMutingMic();
+}
+
 const selectTargetUser = (tragetId) => {
   location.href = `/chat/${tragetId}`;
 };
